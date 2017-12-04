@@ -28,7 +28,7 @@ void ReceiveFile(SOCKET ConnectSocket, string filename) {
 		else if (iResult > 0) {
 			fileOutput.write(recvbuff, iResult);
 		}
-	} while (iResult > 0);
+	} while (iResult==DEFAULT_BUFLEN);
 	fileOutput.close();
-	printf("transfer complete and file is stored at E:\\saved\\%s.\n", fileName);
+	printf("transfer complete and file is stored at E:\\saved.\n");
 }

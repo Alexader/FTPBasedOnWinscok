@@ -47,7 +47,6 @@ int __cdecl main(int argc, char **argv)
 		cout << "enter your command in format: cmd + optional[space + filename]\n";
 		getline(cin, cmdline);
 		size_t pos;
-		cout << cmdline << endl;
 		//split cmdline and cmdline will be destroyed;
 		while ((pos = cmdline.find(delimiter)) != string::npos) {
 			token = cmdline.substr(0, pos);

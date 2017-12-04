@@ -147,6 +147,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="init.cpp" />
+    <ClCompile Include="ReceiveCmd.cpp" />
+    <ClCompile Include="SendFile.cpp" />
     <ClCompile Include="server.cpp" />
   </ItemGroup>
   <ItemGroup>
