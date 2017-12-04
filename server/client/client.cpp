@@ -1,12 +1,12 @@
 #define WIN32_LEAN_AND_MEAN
 
-#include <windows.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
-#include<fstream>
+#include <iostream>
+#include <vector>
 
 #include "header.h"
 
@@ -18,6 +18,11 @@
 using std::ifstream;
 using std::ofstream;
 using std::string;
+using std::getline;
+using std::cin;
+using std::cout;
+using std::endl;
+using std::vector;
 
 int __cdecl main(int argc, char **argv)
 {
@@ -26,50 +31,43 @@ int __cdecl main(int argc, char **argv)
 	char recvbuf[DEFAULT_BUFLEN];
 	int recvbuflen = DEFAULT_BUFLEN;
 
-	// Validate the parameters
-	if (argc != 3) {
-		printf("usage: %s server-name\n", argv[0]);
-		system("pause");
-		return 1;
-	}
-
 	//connect with server
 	ConnectSocket = ConnectServer(argv[1], DEFAULT_PORT);
 
-	//send a file name first
-	iResult = send(ConnectSocket, argv[2], strlen(argv[2]), 0);
-	// file name is no longer than 512 bytes
-	if (iResult >0) {
-		printf("%d bytes was send", iResult);
-	}
-	else if (iResult == SOCKET_ERROR) {
-		printf("send failed with error: %d\n", WSAGetLastError());
-		closesocket(ConnectSocket);
-		WSACleanup();
-		return 1;
+	cout << "welcome to ftp client!!" << endl;
+	cout << "you can enter command `dir` for source file list, `get [filename]` for file source" << endl;
+	
+	while (true) {
+		//command no longer than 20 bytes
+		string cmdline;
+		vector<string> substrings;
+		string delimiter = " ";
+		//for record substring
+		string token;
+		cout << "enter your command in format: cmd + optional[space + filename]\n";
+		getline(cin, cmdline);
+		size_t pos;
+		cout << cmdline << endl;
+		//split cmdline and cmdline will be destroyed;
+		while ((pos = cmdline.find(delimiter)) != string::npos) {
+			token = cmdline.substr(0, pos);
+			cmdline.erase(0, pos + delimiter.length());
+			substrings.push_back(token);
+		}
+		substrings.push_back(cmdline);
+		string cmd = substrings[0];
+		string param = substrings[1];
+		//different command with respectively handle
+		if (!cmd.compare("get")) {
+			SendCmd(ConnectSocket, cmd);
+			SendCmd(ConnectSocket, param);
+			ReceiveFile(ConnectSocket, param);
+		}
+		else if(!cmd.compare("ls")) {
+			SendCmd(ConnectSocket, cmd);
+		}
 	}
 
-	//receive a file and store;
-	string fileName(argv[2]);
-	char* recvbuff = new char[DEFAULT_BUFLEN];
-	ofstream fileOutput("e:\\saved\\"+fileName, ofstream::binary);
-	do {
-		
-		iResult = recv(ConnectSocket, recvbuff, DEFAULT_BUFLEN, 0);
-		if (iResult == SOCKET_ERROR) {
-			printf("receive failed with error: %d\n", WSAGetLastError());
-			closesocket(ConnectSocket);
-			fileOutput.close();
-			WSACleanup();
-			return 1;
-		}
-		else if (iResult > 0) {
-			fileOutput.write(recvbuff, iResult);
-		}
-	} while (iResult > 0);
-	fileOutput.close();
-	printf("trans complete.\n");
-	printf("Bytes Sent: %ld\n", iResult);
 
 	// shutdown the connection since no more data will be sent
 	iResult = shutdown(ConnectSocket, SD_SEND);
