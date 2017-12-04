@@ -7,6 +7,9 @@
 #include <ws2tcpip.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string>
+#include <fstream>
+#include <sstream>
 
 // Need to link with Ws2_32.lib
 #pragma comment (lib, "Ws2_32.lib")
@@ -15,19 +18,22 @@
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT "27015"
 
+using std::ifstream;
+using std::ofstream;
+using std::string;
+using std::stringstream;
+
 int __cdecl main(void)
 {
 	WSADATA wsaData;
 	int iResult;
 
-	SOCKADDR_IN in;
 	SOCKET ListenSocket = INVALID_SOCKET;
 	SOCKET ClientSocket = INVALID_SOCKET;
 
 	struct addrinfo *result = NULL;
 	struct addrinfo hints;
 
-	int iSendResult;
 	char recvbuf[DEFAULT_BUFLEN];
 	int recvbuflen = DEFAULT_BUFLEN;
 
@@ -93,23 +99,15 @@ int __cdecl main(void)
 	// No longer need server socket
 	closesocket(ListenSocket);
 
-	// Receive until the peer shuts down the connection
+	//receive filename first
+	string fileName;
 	do {
-
 		iResult = recv(ClientSocket, recvbuf, recvbuflen, 0);
 		if (iResult > 0) {
 			printf("Bytes received: %d\n", iResult);
-
-			// Echo the buffer back to the sender
-			iSendResult = send(ClientSocket, recvbuf, iResult, 0);
-			if (iSendResult == SOCKET_ERROR) {
-				printf("send failed with error: %d\n", WSAGetLastError());
-				closesocket(ClientSocket);
-				WSACleanup();
-				return 1;
-			}
-			printf("Bytes sent: %d\n", iSendResult);
+			fileName.append(recvbuf, iResult);
 		}
+		// Receive until the peer shuts down the connection
 		else if (iResult == 0)
 			printf("Connection closing...\n");
 		else {
@@ -118,8 +116,37 @@ int __cdecl main(void)
 			WSACleanup();
 			return 1;
 		}
+	} while (iResult == recvbuflen);
+	//not receiving anything
+	if (fileName.length() == 0) exit(1);
 
-	} while (iResult > 0);
+
+	//setup a fstream for writing files
+	ifstream inputFile("e:\\uri\\" + fileName);
+	//get the length of a file.
+	inputFile.seekg(0, inputFile.end);
+	int fileLength = inputFile.tellg();
+	//reset cursor
+	inputFile.seekg(0, inputFile.beg);
+
+	char* fileBuffer = new char[DEFAULT_BUFLEN];
+	int actualLength;
+	do {
+		actualLength = DEFAULT_BUFLEN > fileLength ? fileLength : DEFAULT_BUFLEN;
+		inputFile.read(fileBuffer, actualLength);
+		//record the output data length
+		fileLength -= actualLength;
+		iResult = send(ClientSocket, fileBuffer, actualLength, 0);
+		if (iResult == SOCKET_ERROR) {
+			printf("send failed with error: %d\n", WSAGetLastError());
+			closesocket(ClientSocket);
+			inputFile.close();
+			WSACleanup();
+			return 1;
+		}
+	} while (fileLength != 0);
+	inputFile.close();
+	printf("trans complete.\n");
 
 	// shutdown the connection since we're done
 	iResult = shutdown(ClientSocket, SD_SEND);

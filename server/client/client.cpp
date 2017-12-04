@@ -5,105 +5,70 @@
 #include <ws2tcpip.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string>
 #include<fstream>
+
+#include "header.h"
 
 // Need to link with Ws2_32.lib, Mswsock.lib, and Advapi32.lib
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "Mswsock.lib")
 #pragma comment (lib, "AdvApi32.lib")
 
-
-#define DEFAULT_BUFLEN 512
-#define DEFAULT_PORT "27015"
-
 using std::ifstream;
 using std::ofstream;
+using std::string;
 
 int __cdecl main(int argc, char **argv)
 {
-	WSADATA wsaData;
 	SOCKET ConnectSocket = INVALID_SOCKET;
-	struct addrinfo *result = NULL,
-		*ptr = NULL,
-		hints;
-	char *sendbuf = "this is a test";
-	char recvbuf[DEFAULT_BUFLEN];
 	int iResult;
+	char recvbuf[DEFAULT_BUFLEN];
 	int recvbuflen = DEFAULT_BUFLEN;
 
 	// Validate the parameters
-	if (argc != 2) {
+	if (argc != 3) {
 		printf("usage: %s server-name\n", argv[0]);
 		system("pause");
 		return 1;
 	}
 
-	// Initialize Winsock
-	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
-	if (iResult != 0) {
-		printf("WSAStartup failed with error: %d\n", iResult);
-		return 1;
+	//connect with server
+	ConnectSocket = ConnectServer(argv[1], DEFAULT_PORT);
+
+	//send a file name first
+	iResult = send(ConnectSocket, argv[2], strlen(argv[2]), 0);
+	// file name is no longer than 512 bytes
+	if (iResult >0) {
+		printf("%d bytes was send", iResult);
 	}
-
-	ZeroMemory(&hints, sizeof(hints));
-	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_protocol = IPPROTO_TCP;
-
-	// Resolve the server address and port
-	iResult = getaddrinfo(argv[1], DEFAULT_PORT, &hints, &result);
-	if (iResult != 0) {
-		printf("getaddrinfo failed with error: %d\n", iResult);
+	else if (iResult == SOCKET_ERROR) {
+		printf("send failed with error: %d\n", WSAGetLastError());
+		closesocket(ConnectSocket);
 		WSACleanup();
 		return 1;
 	}
 
-	// Attempt to connect to an address until one succeeds
-	for (ptr = result; ptr != NULL; ptr = ptr->ai_next) {
-
-		// Create a SOCKET for connecting to server
-		ConnectSocket = socket(ptr->ai_family, ptr->ai_socktype,
-			ptr->ai_protocol);
-		if (ConnectSocket == INVALID_SOCKET) {
-			printf("socket failed with error: %ld\n", WSAGetLastError());
-			WSACleanup();
-			return 1;
-		}
-
-		// Connect to server.
-		iResult = connect(ConnectSocket, ptr->ai_addr, (int)ptr->ai_addrlen);
-		if (iResult == SOCKET_ERROR) {
-			closesocket(ConnectSocket);
-			ConnectSocket = INVALID_SOCKET;
-			continue;
-		}
-		break;
-	}
-
-	freeaddrinfo(result);
-
-	if (ConnectSocket == INVALID_SOCKET) {
-		printf("Unable to connect to server!\n");
-		WSACleanup();
-		return 1;
-	}
-
-	//send a file to client;
-	char* sendbuff = new char[DEFAULT_BUFLEN];
-	ifstream fileInput("e:\\saved\\file.txt", ofstream::binary);
+	//receive a file and store;
+	string fileName(argv[2]);
+	char* recvbuff = new char[DEFAULT_BUFLEN];
+	ofstream fileOutput("e:\\saved\\"+fileName, ofstream::binary);
 	do {
-		fileInput.read(sendbuff, DEFAULT_BUFLEN);
-		iResult = send(ConnectSocket, sendbuff, DEFAULT_BUFLEN, 0);
+		
+		iResult = recv(ConnectSocket, recvbuff, DEFAULT_BUFLEN, 0);
 		if (iResult == SOCKET_ERROR) {
-			printf("send failed with error: %d\n", WSAGetLastError());
+			printf("receive failed with error: %d\n", WSAGetLastError());
 			closesocket(ConnectSocket);
-			fileInput.close();
+			fileOutput.close();
 			WSACleanup();
 			return 1;
 		}
-	} while (!fileInput.eof());
-	fileInput.close();
-	printf("trans complete");
+		else if (iResult > 0) {
+			fileOutput.write(recvbuff, iResult);
+		}
+	} while (iResult > 0);
+	fileOutput.close();
+	printf("trans complete.\n");
 	printf("Bytes Sent: %ld\n", iResult);
 
 	// shutdown the connection since no more data will be sent
