@@ -24,6 +24,8 @@ using std::cout;
 using std::endl;
 using std::vector;
 
+void ReceiveList(SOCKET Conncect, vector<string> &list);
+
 int __cdecl main(int argc, char **argv)
 {
 	SOCKET ConnectSocket = INVALID_SOCKET;
@@ -31,7 +33,7 @@ int __cdecl main(int argc, char **argv)
 	char recvbuf[DEFAULT_BUFLEN];
 	int recvbuflen = DEFAULT_BUFLEN;
 
-	//connect with server
+	//connect with server, argv[1] is the hostname or ip address
 	ConnectSocket = ConnectServer(argv[1], DEFAULT_PORT);
 
 	cout << "welcome to ftp client!!" << endl;
@@ -44,7 +46,7 @@ int __cdecl main(int argc, char **argv)
 		string delimiter = " ";
 		//for record substring
 		string token;
-		cout << "enter your command in format: cmd + optional[space + filename]\n";
+		cout << "enter your command in format: cmd + optional[space + filename]\nftp>";
 		getline(cin, cmdline);
 		size_t pos;
 		//split cmdline and cmdline will be destroyed;
@@ -54,16 +56,36 @@ int __cdecl main(int argc, char **argv)
 			substrings.push_back(token);
 		}
 		substrings.push_back(cmdline);
-		string cmd = substrings[0];
-		string param = substrings[1];
-		//different command with respectively handle
-		if (!cmd.compare("get")) {
+
+		//deal with different commands
+		int size = substrings.size();
+		string cmd, param;
+		if (size == 1) {
+			cmd = substrings[0];
+			if (!cmd.compare("ls")) {
 			SendCmd(ConnectSocket, cmd);
-			SendCmd(ConnectSocket, param);
-			ReceiveFile(ConnectSocket, param);
+			cout << "send ls success" << endl;
+			vector<string> fileNameToShow;
+			ReceiveList(ConnectSocket, fileNameToShow);
+			for (size_t i = 0; i < fileNameToShow.size(); i++) {
+				cout << fileNameToShow[i] << endl;
+			}
+			if (!cmd.compare("exit")) {
+				//exit ftp
+				SendCmd(ConnectSocket, cmd);
+				cout << "leave ftp, byte" << endl;
+				break;
+			}
+			}
 		}
-		else if(!cmd.compare("ls")) {
-			SendCmd(ConnectSocket, cmd);
+		else if (size == 2) {
+			param = substrings[1];
+			//different command with respectively handle
+			if (!cmd.compare("get")) {
+				SendCmd(ConnectSocket, cmd);
+				SendCmd(ConnectSocket, param);
+				ReceiveFile(ConnectSocket, param);
+			}
 		}
 	}
 
@@ -95,4 +117,27 @@ int __cdecl main(int argc, char **argv)
 	WSACleanup();
 	system("pause");
 	return 0;
+}
+
+void ReceiveList(SOCKET Connect, vector<string> &list) {
+	int iResult;
+	long size = 0;
+	//know how many strings will received
+	recv(Connect, (char*)&size, sizeof(size), 0);
+	size = ntohl(size);
+	for (int i = 0; i < size; ++i) {
+		std::string stringRead;
+		long length = 0;
+		//get length of each filename string
+		recv(Connect, (char*)&length, sizeof(length), 0);
+		length = ntohl(length);
+		while (0 < length) {
+			char buffer[CMD_MAX_LEN];
+			int cread;
+			cread = recv(Connect, buffer, min(sizeof(buffer), length), 0);
+			stringRead.append(buffer, cread);
+			length -= cread;
+		}
+		list.push_back(stringRead);
+	}
 }
