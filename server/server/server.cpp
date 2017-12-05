@@ -48,6 +48,10 @@ int __cdecl main(void)
 		else if (!cmd.compare("exit")) {
 			break;
 		}
+		else if (!cmd.compare("put")) {
+			string filename = ReceiveCmd(ClientSocket);
+			ReceiveFile(ClientSocket, filename);
+		}
 	}
 
 	// shutdown the connection since we're done

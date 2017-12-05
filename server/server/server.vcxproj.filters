@@ -30,6 +30,9 @@
     <ClCompile Include="SendList.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="ReceiveFile.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="header.h">

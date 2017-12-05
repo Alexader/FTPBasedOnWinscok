@@ -17,4 +17,5 @@ SOCKET init();
 void SendFile(SOCKET ClientSocket, string filename);
 string ReceiveCmd(SOCKET ClientSocket);
 void SendList(SOCKET connect, vector<string> list);
+void ReceiveFile(SOCKET ClientSocket, string filename);
 #endif

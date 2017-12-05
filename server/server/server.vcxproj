@@ -148,6 +148,7 @@
   <ItemGroup>
     <ClCompile Include="init.cpp" />
     <ClCompile Include="ReceiveCmd.cpp" />
+    <ClCompile Include="ReceiveFile.cpp" />
     <ClCompile Include="SendFile.cpp" />
     <ClCompile Include="SendList.cpp" />
     <ClCompile Include="server.cpp" />

@@ -27,6 +27,9 @@
     <ClCompile Include="SendCmd.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="SendFile.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="header.h">

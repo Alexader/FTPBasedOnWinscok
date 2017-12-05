@@ -11,6 +11,9 @@ using std::string;
 
 void SendCmd(SOCKET CmdSocket, string cmd) {
 	int iResult;
+	long size = htonl(cmd.length());
+	send(CmdSocket, (char*)&size, sizeof(size), 0);
+	
 	iResult = send(CmdSocket, cmd.c_str(), cmd.length(), 0);
 	// file name is no longer than 20 bytes
 	if (iResult >0) {

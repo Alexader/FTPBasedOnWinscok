@@ -63,28 +63,35 @@ int __cdecl main(int argc, char **argv)
 		if (size == 1) {
 			cmd = substrings[0];
 			if (!cmd.compare("ls")) {
-			SendCmd(ConnectSocket, cmd);
-			cout << "send ls success" << endl;
-			vector<string> fileNameToShow;
-			ReceiveList(ConnectSocket, fileNameToShow);
-			for (size_t i = 0; i < fileNameToShow.size(); i++) {
-				cout << fileNameToShow[i] << endl;
+				//Chinese character not supported
+				SendCmd(ConnectSocket, cmd);
+				cout << "send ls success" << endl;
+				vector<string> fileNameToShow;
+				ReceiveList(ConnectSocket, fileNameToShow);
+				for (size_t i = 0; i < fileNameToShow.size(); i++) {
+					cout << fileNameToShow[i] << endl;
+				}
 			}
-			if (!cmd.compare("exit")) {
+			else if (!cmd.compare("exit")) {
 				//exit ftp
 				SendCmd(ConnectSocket, cmd);
 				cout << "leave ftp, byte" << endl;
 				break;
 			}
-			}
 		}
 		else if (size == 2) {
+			cmd = substrings[0];
 			param = substrings[1];
 			//different command with respectively handle
 			if (!cmd.compare("get")) {
 				SendCmd(ConnectSocket, cmd);
 				SendCmd(ConnectSocket, param);
 				ReceiveFile(ConnectSocket, param);
+			}
+			else if (!cmd.compare("put")) {
+				SendCmd(ConnectSocket, cmd);
+				SendCmd(ConnectSocket, param);
+				SendFile(ConnectSocket, param);
 			}
 		}
 	}
@@ -101,7 +108,6 @@ int __cdecl main(int argc, char **argv)
 
 	// Receive until the peer closes the connection
 	do {
-
 		iResult = recv(ConnectSocket, recvbuf, recvbuflen, 0);
 		if (iResult > 0)
 			printf("Bytes received: %d\n", iResult);
@@ -121,6 +127,13 @@ int __cdecl main(int argc, char **argv)
 
 void ReceiveList(SOCKET Connect, vector<string> &list) {
 	int iResult;
+	//non-blocking mode for socket
+	unsigned long imode = 1;
+	iResult = ioctlsocket(Connect, FIONBIO, &imode);
+	if (iResult != NO_ERROR)
+	{
+		printf("ioctlsocket failed with error: %ld\n", iResult);
+	}
 	long size = 0;
 	//know how many strings will received
 	recv(Connect, (char*)&size, sizeof(size), 0);
