@@ -42,3 +42,20 @@ string ReceiveCmd(SOCKET ClientSocket) {
 	if (cmd.length() == 0) exit(1);
 	return cmd;
 }
+
+void response(SOCKET InfoSocket, string info) {
+	int iResult;
+	long size = htonl(info.length());
+	send(InfoSocket, (char*)&size, sizeof(size), 0);
+
+	iResult = send(InfoSocket, info.c_str(), info.length(), 0);
+	if (iResult >0) {
+		printf("%d bytes command was send.\n", iResult);
+	}
+	else if (iResult == SOCKET_ERROR) {
+		printf("send failed with error: %d\n", WSAGetLastError());
+		closesocket(InfoSocket);
+		WSACleanup();
+		exit(1);
+	}
+}

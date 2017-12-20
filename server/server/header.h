@@ -16,6 +16,8 @@ using std::vector;
 SOCKET init();
 void SendFile(SOCKET ClientSocket, string filename);
 string ReceiveCmd(SOCKET ClientSocket);
+void response(SOCKET local, string info);
 void SendList(SOCKET connect, vector<string> list);
 void ReceiveFile(SOCKET ClientSocket, string filename);
+bool deleteFile(string filename);
 #endif

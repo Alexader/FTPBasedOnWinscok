@@ -32,3 +32,7 @@ void ReceiveFile(SOCKET ConnectSocket, string filename) {
 	fileOutput.close();
 	printf("transfer complete and file is stored at %s.\n", DEFAULT_FILE_PATH);
 }
+
+bool deleteFile(string filename) {
+	return remove((DEFAULT_FILE_PATH + filename).c_str());
+}

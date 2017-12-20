@@ -149,8 +149,8 @@
   <ItemGroup>
     <ClCompile Include="client.cpp" />
     <ClCompile Include="ConnectServer.cpp" />
-    <ClCompile Include="SendCmd.cpp" />
-    <ClCompile Include="ReceiveFile.cpp" />
+    <ClCompile Include="HandleCmd.cpp" />
+    <ClCompile Include="FIleOperation.cpp" />
     <ClCompile Include="SendFile.cpp" />
   </ItemGroup>
   <ItemGroup>

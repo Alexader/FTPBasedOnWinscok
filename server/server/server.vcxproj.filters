@@ -24,13 +24,13 @@
     <ClCompile Include="SendFile.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="ReceiveCmd.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="SendList.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="ReceiveFile.cpp">
+    <ClCompile Include="FileOpts.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="HandleInfo.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

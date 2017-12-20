@@ -53,6 +53,19 @@ int __cdecl main(void)
 			string filename = ReceiveCmd(ClientSocket);
 			ReceiveFile(ClientSocket, filename);
 		}
+		else if (!cmd.compare("delete")) {
+			//excute `delete` command and then send ack
+			string filename = ReceiveCmd(ClientSocket);
+			if (!deleteFile(filename))
+			{
+				response(ClientSocket, "delete success");
+				printf("delete success\n");
+			}
+			else {
+				response(ClientSocket, "delete failed");
+				printf("delete failed\n");
+			}
+		}
 	}
 
 	// shutdown the connection since we're done

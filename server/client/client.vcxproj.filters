@@ -21,13 +21,13 @@
     <ClCompile Include="ConnectServer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="ReceiveFile.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="SendCmd.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="SendFile.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="FIleOperation.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="HandleCmd.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

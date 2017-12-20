@@ -14,5 +14,6 @@ using std::string;
 SOCKET ConnectServer(const char *hostname, const char *port);
 void ReceiveFile(SOCKET ConnectSocket, string filename);
 void SendCmd(SOCKET CmdSocket, string cmd);
+string ReceiveRes(SOCKET local);
 void SendFile(SOCKET ClientSocket, string fileName);
 #endif

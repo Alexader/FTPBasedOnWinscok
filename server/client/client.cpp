@@ -93,6 +93,12 @@ int __cdecl main(int argc, char **argv)
 				SendCmd(ConnectSocket, param);
 				SendFile(ConnectSocket, param);
 			}
+			else if (!cmd.compare("delete")) {
+				SendCmd(ConnectSocket, cmd);
+				SendCmd(ConnectSocket, param);
+				string res = ReceiveRes(ConnectSocket);
+				cout << res << endl;
+			}
 		}
 	}
 
