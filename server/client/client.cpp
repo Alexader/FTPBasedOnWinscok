@@ -65,7 +65,7 @@ int __cdecl main(int argc, char **argv)
 			if (!cmd.compare("ls")) {
 				//Chinese character not supported
 				SendCmd(ConnectSocket, cmd);
-				cout << "send ls success" << endl;
+				cout << "send cmd `ls` success" << endl;
 				vector<string> fileNameToShow;
 				ReceiveList(ConnectSocket, fileNameToShow);
 				for (size_t i = 0; i < fileNameToShow.size(); i++) {

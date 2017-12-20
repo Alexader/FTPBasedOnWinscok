@@ -18,7 +18,7 @@
 using std::string;
 using std::vector;
 
-//declare a function
+//declare a function for list out file entries
 vector<string> listFile(string filePath);
 
 int __cdecl main(void)
@@ -31,6 +31,7 @@ int __cdecl main(void)
 
 	//initialize socket
 	ClientSocket = init();
+	printf("ftp server is on\n");
 	
 	while (true) {
 		string cmd;
